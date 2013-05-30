@@ -145,16 +145,4 @@ public class ZApi {
 		return result;
 	}
 
-	public static void main(String[] args) {
-
-		ZApi zapi = new ZApi();
-		zapi.zLogin();
-
-		QueryResult queryResult = zapi.zQuery("SELECT Id, AccountNumber, Name FROM Account");
-
-		for (ZObject zobj : queryResult.getRecords()) {
-			Account account = (Account) zobj;
-			logger.info("Account " + account.getAccountNumber() + " `" + account.getName() + "` -> " + account.getId());
-		}
-	}
 }
