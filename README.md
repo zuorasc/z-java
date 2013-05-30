@@ -34,3 +34,16 @@ Using a custom/different WSDL
 1. Add your WSDL to the `src/main/wsdl` folder
 2. Edit the `pom.xml` file `line 123` and change the value for your WSDL name
 3. `mvn package`
+
+
+Usage
+-----
+
+    ZApi zapi = new ZApi();
+
+    // This should be called before any other call
+    zapi.zLogin();
+
+    // Example on how to do a query
+    QueryResult result = zapi.zQuery("SELECT AccountNumber, Name FROM Account");
+

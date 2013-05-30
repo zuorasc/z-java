@@ -12,7 +12,6 @@ import com.zuora.api.axis2.LoginFault;
 import com.zuora.api.axis2.MalformedQueryFault;
 import com.zuora.api.axis2.UnexpectedErrorFault;
 import com.zuora.api.axis2.ZuoraServiceStub;
-import com.zuora.api.axis2.ZuoraServiceStub.Account;
 import com.zuora.api.axis2.ZuoraServiceStub.Login;
 import com.zuora.api.axis2.ZuoraServiceStub.LoginResponse;
 import com.zuora.api.axis2.ZuoraServiceStub.LoginResult;
@@ -20,7 +19,6 @@ import com.zuora.api.axis2.ZuoraServiceStub.Query;
 import com.zuora.api.axis2.ZuoraServiceStub.QueryResponse;
 import com.zuora.api.axis2.ZuoraServiceStub.QueryResult;
 import com.zuora.api.axis2.ZuoraServiceStub.SessionHeader;
-import com.zuora.api.axis2.ZuoraServiceStub.ZObject;
 
 public class ZApi {
 
@@ -42,6 +40,9 @@ public class ZApi {
 	/** The header. */
 	private SessionHeader header;
 
+	/** The endpoint used. */
+	private String endpoint;
+
 	/**
 	 * Instantiates a new Zuora API Helper
 	 */
@@ -50,9 +51,10 @@ public class ZApi {
 		logger.info("Creating a new ZAPI object");
 
 		try {
-			this.stub = new ZuoraServiceStub();
+			setStub(new ZuoraServiceStub());
+
 			// set new ENDPOINT
-			String endpoint = ZuoraUtility.getPropertyValue(PROPERTY_ENDPOINT);
+			setEndpoint(ZuoraUtility.getPropertyValue(PROPERTY_ENDPOINT));
 
 			if (endpoint != null && endpoint.trim().length() > 0) {
 				ServiceClient client = stub._getServiceClient();
@@ -94,8 +96,8 @@ public class ZApi {
 			result = resp.getResult();
 
 			// Create session for all subsequent calls
-			this.header = new SessionHeader();
-			this.header.setSession(result.getSession());
+			setHeader(new SessionHeader());
+			getHeader().setSession(result.getSession());
 
 			logger.info("User `" + ZuoraUtility.getPropertyValue(PROPERTY_USERNAME) + "` successfully connected!");
 
@@ -112,6 +114,13 @@ public class ZApi {
 		return result;
 	}
 
+	/**
+	 * Do a query to Zuora and return the result (no more than 2,000 objects)
+	 * 
+	 * @param queryString
+	 *            The ZOQL query string
+	 * @return The query result
+	 */
 	public QueryResult zQuery(String queryString) {
 
 		QueryResult result = null;
@@ -143,6 +152,30 @@ public class ZApi {
 		}
 
 		return result;
+	}
+
+	public ZuoraServiceStub getStub() {
+		return stub;
+	}
+
+	private void setStub(ZuoraServiceStub stub) {
+		this.stub = stub;
+	}
+
+	public SessionHeader getHeader() {
+		return header;
+	}
+
+	private void setHeader(SessionHeader header) {
+		this.header = header;
+	}
+
+	public String getEndpoint() {
+		return endpoint;
+	}
+
+	private void setEndpoint(String endpoint) {
+		this.endpoint = endpoint;
 	}
 
 }
