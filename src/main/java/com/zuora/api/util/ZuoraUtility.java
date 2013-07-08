@@ -7,6 +7,9 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.zuora.api.axis2.ZuoraServiceStub.ID;
+import com.zuora.api.axis2.ZuoraServiceStub.ZObject;
+
 public class ZuoraUtility {
 
 	/** The logger (using logback, but can easily be configured for log4j). */
@@ -18,6 +21,7 @@ public class ZuoraUtility {
 	/** The properties, loaded from the file. */
 	private static Properties properties = null;
 
+	
 	/**
 	 * Load the properties.
 	 */
@@ -42,6 +46,7 @@ public class ZuoraUtility {
 
 	}
 
+	
 	/**
 	 * Get the properties (singleton pattern).
 	 */
@@ -54,11 +59,65 @@ public class ZuoraUtility {
 		return properties;
 	}
 
+	
 	/**
 	 * Get a property value.
 	 */
 	public static String getPropertyValue(String propertyName) {
 
 		return getProperties().getProperty(propertyName);
+	}
+	
+	
+	/**
+	 * Split object in tab of 50
+	 */
+	public static ZObject[][] splitObjects(ZObject[] objects) {
+
+		int n = objects.length / ZApi.MAX_OBJECTS + 1;
+
+		ZObject[][] returnedObjects = new ZObject[n][ZApi.MAX_OBJECTS];
+
+		for (int i = 0; i < objects.length; i++) {
+			int j = i / ZApi.MAX_OBJECTS;
+			returnedObjects[j][i % ZApi.MAX_OBJECTS] = objects[i];
+		}
+
+		return returnedObjects;
+	}
+
+	
+	/**
+	 * Split string in tab of 50
+	 */
+	public static String[][] splitIds(String[] ids) {
+
+		int n = ids.length / ZApi.MAX_OBJECTS + 1;
+
+		String[][] returnedIds = new String[n][ZApi.MAX_OBJECTS];
+
+		for (int i = 0; i < ids.length; i++) {
+			int j = i / ZApi.MAX_OBJECTS;
+			returnedIds[j][i % ZApi.MAX_OBJECTS] = ids[i];
+		}
+
+		return returnedIds;
+	}
+	
+	
+	/**
+	 * Convert a tab of string in a tab of Zuora IDS
+	 */
+	public static ID[] stringToZuoraId(String[] ids) {
+		
+		ID[] zuoraIds = new ID[ids.length];
+		
+		for (int i = 0; i < ids.length; i++) {
+			ID zId = new ID();
+			zId.setID(ids[i]);
+			zuoraIds[i] = zId;
+		}
+		
+		return zuoraIds;
 	}
 }
