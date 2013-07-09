@@ -1,5 +1,7 @@
 package com.zuora.api.util;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -25,10 +27,18 @@ public class ZuoraUtility {
 	/**
 	 * Load the properties.
 	 */
+	@SuppressWarnings("resource")
 	public static void loadProperties() {
-
-		// Retrieve resource
-		InputStream is = ZuoraUtility.class.getResourceAsStream("/" + FILE_PROPERTY_NAME);
+		
+		// Retrieve resource from working directory, if unfound fall back to packaged resource
+		InputStream is;
+		
+		try {
+			is = new FileInputStream("./" + FILE_PROPERTY_NAME);
+		} catch (FileNotFoundException e1) {
+			logger.debug("Could not read file from working directoy, switching to packaged properties file");
+			is = ZuoraUtility.class.getResourceAsStream("/" + FILE_PROPERTY_NAME);
+		}
 
 		properties = new Properties();
 
@@ -42,8 +52,17 @@ public class ZuoraUtility {
 		} catch (NullPointerException e) {
 			logger.error("Error loading properties file (null pointer exception while loading properties) | "
 					+ e.getMessage());
+		} finally {
+			// Close the resource
+			if (is != null) {
+				try {
+					is.close();
+				} catch (IOException e) {
+					logger.error("Could close the ressource | " + e.getMessage());
+				}
+			}
 		}
-
+		
 	}
 
 	
