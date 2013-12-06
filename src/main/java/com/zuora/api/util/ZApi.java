@@ -28,6 +28,8 @@ import com.zuora.api.axis2.ZuoraServiceStub.QueryResponse;
 import com.zuora.api.axis2.ZuoraServiceStub.QueryResult;
 import com.zuora.api.axis2.ZuoraServiceStub.SaveResult;
 import com.zuora.api.axis2.ZuoraServiceStub.SessionHeader;
+import com.zuora.api.axis2.ZuoraServiceStub.Update;
+import com.zuora.api.axis2.ZuoraServiceStub.UpdateResponse;
 import com.zuora.api.axis2.ZuoraServiceStub.ZObject;
 
 public class ZApi {
@@ -168,7 +170,7 @@ public class ZApi {
 	}
 
 	/**
-	 * Create object in Zuora using API call
+	 * Create object(s) in Zuora using API call
 	 * 
 	 * @param objects
 	 *            array of objects to create
@@ -229,12 +231,78 @@ public class ZApi {
 		} else {
 			logger.error("Null object received during zCreate() operation");
 		}
-		
+
 		return saveResult;
 	}
 
 	/**
-	 * Delete objects in Zuora using API calls
+	 * Update object(s) in Zuora using API calls
+	 * 
+	 * @param objects
+	 *            array of objects to update (must have their Zuora IDs set)
+	 * @return SaveResult or null if an error occured
+	 */
+	public SaveResult[] zUpdate(ZObject[] objects) {
+
+		SaveResult[] saveResult = null;
+
+		try {
+			// If there is more than MAX_OBJECTS to create we split the call and
+			// then merge back the result
+			if (objects.length > MAX_OBJECTS) {
+
+				// Get the objects in split tables
+				ZObject[][] splittedObjects = ZuoraUtility.splitObjects(objects);
+
+				saveResult = new SaveResult[objects.length];
+
+				// For each sub table, create() API call
+				for (int i = 0; i < splittedObjects.length; i++) {
+
+					// Prepare the create object
+					Update update = new Update();
+					update.setZObjects(splittedObjects[i]);
+
+					UpdateResponse updateResponse = stub.update(update, header);
+					SaveResult[] tmpSaveResult = updateResponse.getResult();
+
+					// Save the tmp result in the final table result returned
+					for (int j = 0; j < tmpSaveResult.length; j++) {
+						saveResult[(i * MAX_OBJECTS) + j] = tmpSaveResult[j];
+					}
+				}
+
+			} else {
+
+				// Prepare the create object
+				Update update = new Update();
+				update.setZObjects(objects);
+
+				UpdateResponse updateResponse = stub.update(update, header);
+				saveResult = updateResponse.getResult();
+			}
+
+		} catch (UnexpectedErrorFault e) {
+			logger.error("Unexpected error | " + e.getFaultMessage());
+
+		} catch (InvalidTypeFault e) {
+			logger.error("Invalid Type Fault | " + e.getFaultMessage());
+
+		} catch (RemoteException e) {
+			logger.error("Remote Exception | " + e.getMessage());
+		}
+
+		if (saveResult != null) {
+			logger.debug("Successfully received " + saveResult.length + " save result(s).");
+		} else {
+			logger.error("Null object received during zCreate() operation");
+		}
+
+		return saveResult;
+	}
+
+	/**
+	 * Delete object(s) in Zuora using API calls
 	 * 
 	 * @param ids
 	 *            Zuora ID of object to delete
@@ -245,7 +313,7 @@ public class ZApi {
 	public DeleteResult[] zDelete(String[] ids, String type) {
 
 		DeleteResult[] deleteResult = null;
-		
+
 		try {
 
 			// If there is more than MAX_OBJECTS to create we split the call and
@@ -259,15 +327,15 @@ public class ZApi {
 
 				// For each sub table, create() API call
 				for (int i = 0; i < splittedIds.length; i++) {
-					
+
 					// Convert the IDs to Zuora IDs
 					ID[] zuoraIds = ZuoraUtility.stringToZuoraId(splittedIds[i]);
-					
+
 					// Prepare the delete object
 					Delete delete = new Delete();
 					delete.setType(type);
 					delete.setIds(zuoraIds);
-					
+
 					DeleteResponse deleteResponse = stub.delete(delete, header);
 					DeleteResult[] tmpDeleteResult = deleteResponse.getResult();
 
@@ -280,12 +348,12 @@ public class ZApi {
 			} else {
 				// Convert the IDs to Zuora IDs
 				ID[] zuoraIds = ZuoraUtility.stringToZuoraId(ids);
-				
+
 				// Prepare the delete object
 				Delete delete = new Delete();
 				delete.setType(type);
 				delete.setIds(zuoraIds);
-				
+
 				DeleteResponse deleteResponse = stub.delete(delete, header);
 				deleteResult = deleteResponse.getResult();
 			}
@@ -302,15 +370,14 @@ public class ZApi {
 		} catch (RemoteException e) {
 			logger.error("Remote Exception | " + e.getMessage());
 		}
-		
+
 		if (deleteResult != null)
 			logger.info("Successfully deleted " + deleteResult.length + " zObject(s)");
 		else
 			logger.error("An error occurred during the zDelete() call");
-		
+
 		return deleteResult;
 	}
-	
 
 	// --- Setter(s) & Getter(s) ---
 
