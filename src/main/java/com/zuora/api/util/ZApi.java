@@ -83,18 +83,61 @@ public class ZApi {
 	}
 
 	/**
+	 * Overloaded method to specify the endpoint instead of reading from the
+	 * config.properties file
+	 * 
+	 * @param endpoint
+	 *            Specify the endpoint (Zuora) to connect to
+	 */
+	public ZApi(String endpoint) {
+
+		logger.info("Creating a new ZAPI object");
+
+		try {
+			setStub(new ZuoraServiceStub());
+
+			// set new ENDPOINT
+			setEndpoint(endpoint);
+
+			if (endpoint != null && endpoint.trim().length() > 0) {
+				ServiceClient client = stub._getServiceClient();
+				client.getOptions().getTo().setAddress(endpoint);
+			}
+
+		} catch (AxisFault e) {
+			logger.error(e.getMessage());
+		}
+
+	}
+
+	/**
 	 * zLogin.
 	 * 
 	 * @return LoginResult object
 	 */
 	public LoginResult zLogin() {
 
-		LoginResult result = null;
-
 		String username = ZuoraUtility.getPropertyValue(PROPERTY_USERNAME);
 		String password = ZuoraUtility.getPropertyValue(PROPERTY_PASSWORD);
 
 		logger.debug("Username = " + username + " | Password = " + password);
+
+		return zLogin(username, password);
+	}
+
+	/**
+	 * Overloaded zLogin call to pass username/password credentials instead of
+	 * reading from config.properties file
+	 * 
+	 * @param username
+	 *            Zuora API user
+	 * @param password
+	 *            Zuora API password
+	 * @return LoginResult object
+	 */
+	public LoginResult zLogin(String username, String password) {
+
+		LoginResult result = null;
 
 		// Prepare the login request
 		Login login = new Login();
