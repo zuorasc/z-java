@@ -257,6 +257,7 @@ public class ZApi {
 
 				CreateResponse createResponse = stub.create(create, null, header);
 				saveResult = createResponse.getResult();
+
 			}
 
 		} catch (UnexpectedErrorFault e) {
@@ -273,6 +274,17 @@ public class ZApi {
 			logger.debug("Successfully received " + saveResult.length + " save result(s).");
 		} else {
 			logger.error("Null object received during zCreate() operation");
+		}
+
+		// If an error occurred, log it
+		for (SaveResult result : saveResult) {
+			if (!result.getSuccess()) {
+				logger.error("Create call failed with the following errors:");
+				for (com.zuora.api.axis2.ZuoraServiceStub.Error error : result.getErrors()) {
+					logger.error("field: " + error.getField() + " | message: " + error.getMessage() + " | code: "
+							+ error.getCode());
+				}
+			}
 		}
 
 		return saveResult;
@@ -339,6 +351,17 @@ public class ZApi {
 			logger.debug("Successfully received " + saveResult.length + " save result(s).");
 		} else {
 			logger.error("Null object received during zCreate() operation");
+		}
+
+		// If an error occurred, log it
+		for (SaveResult result : saveResult) {
+			if (!result.getSuccess()) {
+				logger.error("Create call failed with the following errors:");
+				for (com.zuora.api.axis2.ZuoraServiceStub.Error error : result.getErrors()) {
+					logger.error("field: " + error.getField() + " | message: " + error.getMessage() + " | code: "
+							+ error.getCode());
+				}
+			}
 		}
 
 		return saveResult;
