@@ -31,6 +31,11 @@ import com.zuora.api.axis2.ZuoraServiceStub.SessionHeader;
 import com.zuora.api.axis2.ZuoraServiceStub.Update;
 import com.zuora.api.axis2.ZuoraServiceStub.UpdateResponse;
 import com.zuora.api.axis2.ZuoraServiceStub.ZObject;
+import com.zuora.api.axis2.ZuoraServiceStub.SubscribeResult;
+import com.zuora.api.axis2.ZuoraServiceStub.SubscribeRequest;
+import com.zuora.api.axis2.ZuoraServiceStub.Subscribe;
+import com.zuora.api.axis2.ZuoraServiceStub.SubscribeResponse;
+
 
 public class ZApi {
 
@@ -211,6 +216,46 @@ public class ZApi {
 
 		return result;
 	}
+
+    public SubscribeResult[] zSubscribe(SubscribeRequest[] objects) throws UnexpectedErrorFault, RemoteException {
+
+        SubscribeResult[] subscribeResult = null;
+
+        try {
+            if (objects.length > MAX_OBJECTS) {
+
+//                subscribeResult = new SubscribeResult[objects.length];
+
+                Subscribe subscribe = new Subscribe();
+                subscribe.setSubscribes(objects);
+                SubscribeResponse resp = stub.subscribe(subscribe, this.header);
+                subscribeResult = resp.getResult();
+            }
+            else {
+
+                Subscribe create = new ZuoraServiceStub.Subscribe();
+                create.setSubscribes(objects);
+
+                SubscribeResponse createResponse = stub.subscribe(create, this.header);
+                subscribeResult = createResponse.getResult();
+            }
+        } catch (UnexpectedErrorFault e) {
+            logger.error("Unexpected error | " + e.getFaultMessage());
+
+        } catch (RemoteException e) {
+            logger.error("Remote Exception | " + e.getMessage());
+        } catch (Exception e) {
+            logger.error("Exception | " + e.getMessage());
+        }
+
+        if (subscribeResult != null) {
+            logger.debug("Successfully received " + subscribeResult.length + " subscribe result(s).");
+        } else {
+            logger.error("Null object received during zSubscribe() operation");
+        }
+
+        return subscribeResult;
+    }
 
 	/**
 	 * Create object(s) in Zuora using API call
