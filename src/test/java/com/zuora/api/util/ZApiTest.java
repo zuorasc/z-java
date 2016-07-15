@@ -69,7 +69,6 @@ public class ZApiTest {
 	}
 
 	@Test
-	@Ignore
 	public void testZSubscribe() throws UnexpectedErrorFault, RemoteException, ParseException {
 		zapi.zLogin();
 

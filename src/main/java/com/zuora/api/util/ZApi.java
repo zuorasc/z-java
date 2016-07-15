@@ -217,6 +217,13 @@ public class ZApi {
 		return result;
 	}
 
+	/**
+	 * Create subscription(s) in Zuora using API call
+	 *
+	 * @param objects
+	 *            array of SubscriptionRequest to create
+	 * @return SubscribeResult or null if an error occured
+	 */
     public SubscribeResult[] zSubscribe(SubscribeRequest[] objects) throws UnexpectedErrorFault, RemoteException {
 
         SubscribeResult[] subscribeResult = null;
