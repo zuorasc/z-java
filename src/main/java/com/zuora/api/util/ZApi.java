@@ -226,37 +226,47 @@ public class ZApi {
 	 */
     public SubscribeResult[] zSubscribe(SubscribeRequest[] objects) throws UnexpectedErrorFault, RemoteException {
 
-        SubscribeResult[] subscribeResult = null;
+		SubscribeResult[] subscribeResult = null;
 
-        try {
-            if (objects.length > MAX_OBJECTS) {
+		try {
+			if (objects.length > MAX_OBJECTS) {
 
 //                subscribeResult = new SubscribeResult[objects.length];
 
-                Subscribe subscribe = new Subscribe();
-                subscribe.setSubscribes(objects);
-                SubscribeResponse resp = stub.subscribe(subscribe, this.header);
-                subscribeResult = resp.getResult();
-            }
-            else {
+				Subscribe subscribe = new Subscribe();
+				subscribe.setSubscribes(objects);
+				SubscribeResponse resp = stub.subscribe(subscribe, this.header);
+				subscribeResult = resp.getResult();
+			} else {
 
-                Subscribe create = new ZuoraServiceStub.Subscribe();
-                create.setSubscribes(objects);
+				Subscribe create = new ZuoraServiceStub.Subscribe();
+				create.setSubscribes(objects);
 
-                SubscribeResponse createResponse = stub.subscribe(create, this.header);
-                subscribeResult = createResponse.getResult();
-            }
-        } catch (UnexpectedErrorFault e) {
-            logger.error("Unexpected error | " + e.getFaultMessage());
+				SubscribeResponse createResponse = stub.subscribe(create, this.header);
+				subscribeResult = createResponse.getResult();
+			}
+		} catch (UnexpectedErrorFault e) {
+			logger.error("Unexpected error | " + e.getFaultMessage());
 
-        } catch (RemoteException e) {
-            logger.error("Remote Exception | " + e.getMessage());
-        } catch (Exception e) {
-            logger.error("Exception | " + e.getMessage());
-        }
+		} catch (RemoteException e) {
+			logger.error("Remote Exception | " + e.getMessage());
+		} catch (Exception e) {
+			logger.error("Exception | " + e.getMessage());
+		}
 
         if (subscribeResult != null) {
             logger.debug("Successfully received " + subscribeResult.length + " subscribe result(s).");
+
+			for (SubscribeResult result : subscribeResult) {
+				if (!result.getSuccess()) {
+					logger.error("Create call failed with the following errors:");
+					for (com.zuora.api.axis2.ZuoraServiceStub.Error error : result.getErrors()) {
+						logger.error("field: " + error.getField() + " | message: " + error.getMessage() + " | code: "
+								+ error.getCode());
+					}
+				}
+			}
+
         } else {
             logger.error("Null object received during zSubscribe() operation");
         }
