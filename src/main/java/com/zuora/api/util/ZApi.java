@@ -216,6 +216,64 @@ public class ZApi {
 	}
 
 	/**
+	 * Create subscription(s) in Zuora using API call
+	 *
+	 * @param objects
+	 *            array of SubscriptionRequest to create
+	 * @return SubscribeResult or null if an error occured
+	 */
+	public ZuoraServiceStub.SubscribeResult[] zSubscribe(ZuoraServiceStub.SubscribeRequest[] objects) throws UnexpectedErrorFault, RemoteException {
+
+		ZuoraServiceStub.SubscribeResult[] subscribeResult = null;
+
+		try {
+			if (objects.length > MAX_OBJECTS) {
+
+//                subscribeResult = new SubscribeResult[objects.length];
+
+				ZuoraServiceStub.Subscribe subscribe = new ZuoraServiceStub.Subscribe();
+				subscribe.setSubscribes(objects);
+				ZuoraServiceStub.SubscribeResponse resp = stub.subscribe(subscribe, this.header);
+				subscribeResult = resp.getResult();
+			} else {
+
+				ZuoraServiceStub.Subscribe create = new ZuoraServiceStub.Subscribe();
+				create.setSubscribes(objects);
+
+				ZuoraServiceStub.SubscribeResponse createResponse;
+				createResponse = stub.subscribe(create, this.header);
+				subscribeResult = createResponse.getResult();
+			}
+		} catch (UnexpectedErrorFault e) {
+			logger.error("Unexpected error | " + e.getFaultMessage());
+
+		} catch (RemoteException e) {
+			logger.error("Remote Exception | " + e.getMessage());
+		} catch (Exception e) {
+			logger.error("Exception | " + e.getMessage());
+		}
+
+		if (subscribeResult != null) {
+			logger.debug("Successfully received " + subscribeResult.length + " subscribe result(s).");
+
+			for (ZuoraServiceStub.SubscribeResult result : subscribeResult) {
+				if (!result.getSuccess()) {
+					logger.error("Create call failed with the following errors:");
+					for (com.zuora.api.axis2.ZuoraServiceStub.Error error : result.getErrors()) {
+						logger.error("field: " + error.getField() + " | message: " + error.getMessage() + " | code: "
+								+ error.getCode());
+					}
+				}
+			}
+
+		} else {
+			logger.error("Null object received during zSubscribe() operation");
+		}
+
+		return subscribeResult;
+	}
+
+	/**
 	 * Requests aditional result from a previous query() call.
 	 *
 	 * @param queryLocator
