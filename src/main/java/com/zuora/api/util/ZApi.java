@@ -24,6 +24,9 @@ import com.zuora.api.axis2.ZuoraServiceStub.Login;
 import com.zuora.api.axis2.ZuoraServiceStub.LoginResponse;
 import com.zuora.api.axis2.ZuoraServiceStub.LoginResult;
 import com.zuora.api.axis2.ZuoraServiceStub.Query;
+import com.zuora.api.axis2.ZuoraServiceStub.QueryLocator;
+import com.zuora.api.axis2.ZuoraServiceStub.QueryMore;
+import com.zuora.api.axis2.ZuoraServiceStub.QueryMoreResponse;
 import com.zuora.api.axis2.ZuoraServiceStub.QueryResponse;
 import com.zuora.api.axis2.ZuoraServiceStub.QueryResult;
 import com.zuora.api.axis2.ZuoraServiceStub.SaveResult;
@@ -200,6 +203,40 @@ public class ZApi {
 
 		} catch (MalformedQueryFault e) {
 			logger.error("Malformed Query | " + e.getMessage());
+
+		} catch (UnexpectedErrorFault e) {
+			logger.error("Unexpected Error Fault | " + e.getMessage());
+
+		} catch (InvalidQueryLocatorFault e) {
+			logger.error("Invalid Query Locator | " + e.getMessage());
+
+		}
+
+		return result;
+	}
+
+	/**
+	 * Requests aditional result from a previous query() call.
+	 *
+	 * @param queryLocator
+	 * 			QueryLocator from the query call
+	 *
+	 * @return The query result
+     */
+	public QueryResult zQueryMore(QueryLocator queryLocator) {
+
+		QueryResult result = null;
+
+		// Prepares the query
+		QueryMore query = new QueryMore();
+
+		try {
+			QueryMoreResponse resp = stub.queryMore(query, null, header);
+			result = resp.getResult();
+			logger.info("Query returned " + result.getSize() + " values");
+
+		} catch (RemoteException e) {
+			logger.error("Remote Exception | " + e.getMessage());
 
 		} catch (UnexpectedErrorFault e) {
 			logger.error("Unexpected Error Fault | " + e.getMessage());

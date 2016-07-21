@@ -12,7 +12,7 @@ Extract from the `pom.xml` file of your other project:
 <dependency>
     <groupId>com.zuora</groupId>
     <artifactId>z-java</artifactId>
-    <version>0.1</version>
+    <version>0.2</version>
 </dependency>
 ```
 
@@ -32,7 +32,7 @@ Installation
 
 First, clone the github repository on your computer
 
-    git clone https://github.com/mpham-zuora/z-java.git
+    git clone https://github.com/abaenglish/z-java.git
     cd z-java
 
 Copy the sample properties files and edit it to add your credentials
