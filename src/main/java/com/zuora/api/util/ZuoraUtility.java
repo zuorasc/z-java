@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Calendar;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -139,4 +140,14 @@ public class ZuoraUtility {
 		
 		return zuoraIds;
 	}
+
+	/**
+	 * Gets the current date.
+	 *
+	 * @return the current date
+	 */
+	public static Calendar getCurrentDate() {
+		return Calendar.getInstance();
+	}
+
 }
