@@ -4,7 +4,7 @@
 
     <groupId>com.zuora</groupId>
     <artifactId>z-java</artifactId>
-    <version>0.2</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>z-java</name>
@@ -190,5 +190,13 @@
             </plugin>
         </plugins>
     </build>
+
+    <scm>
+        <connection>scm:git:ssh://git@github.com:abaenglish/z-java.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:abaenglish/z-java.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/abaenglish/z-java</url>
+    </scm>
+
 
 </project>
