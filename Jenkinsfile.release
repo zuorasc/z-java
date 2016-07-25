@@ -6,9 +6,7 @@ node {
     deleteDir()
     checkout scm
 
-    writeFile file: 'config.properties', text: "username = ${env.ZUORA_USERNAME}
-    password = ${env.ZUORA_PASSWORD}
-    endpoint = https://apisandbox.zuora.com/apps/services/a/78.0"
+    writeFile file: 'config.properties', text: "username = ${env.ZUORA_USERNAME} password = ${env.ZUORA_PASSWORD} endpoint = https://apisandbox.zuora.com/apps/services/a/78.0"
 
     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: '89af81ea-0d70-480f-a0c7-6bc486e78154', passwordVariable: 'ABBOT_PASSWORD', usernameVariable: 'ABBOT_LOGIN']]) {
         sh "mvn -B clean package jgitflow:release-start -DautoVersionSubmodules=true -Dusername=${env.ABBOT_LOGIN} -Dpassword=${env.ABBOT_PASSWORD}"
