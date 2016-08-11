@@ -28,12 +28,4 @@ node {
 
     sh "mvn -B verify -Pcoverage"
     step([$class: 'JUnitResultArchiver', testResults: '**/target/*-reports/*.xml'])
-
-    stage 'code quality'
-
-    writeFile file: 'src/main/resources/config.properties', text: "username = ${env.ZUORA_USERNAME}\r\n password = ${env.ZUORA_PASSWORD}\r\n endpoint = https://apisandbox.zuora.com/apps/services/a/78.0"
-
-    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'sonarqube', passwordVariable: 'SONAR_PASSWORD', usernameVariable: 'SONAR_LOGIN']]) {
-        sh "mvn -e -B sonar:sonar -Dsonar.host.url=http://sonar.aba.land:9000/ -Dsonar.branch=develop -Dsonar.login=${env.SONAR_LOGIN} -Dsonar.password=${env.SONAR_PASSWORD}"
-    }
 }
