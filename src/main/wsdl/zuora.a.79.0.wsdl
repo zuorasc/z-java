@@ -759,6 +759,7 @@
 			               	<element minOccurs="0" name="UsageRecordRatingOption" nillable="true" type="string"  />
 			               	<element minOccurs="0" name="UseDiscountSpecificAccountingCode" nillable="true" type="boolean" />
 							<element minOccurs="0" name="UseTenantDefaultForPriceChange" nillable="true" type="boolean" />
+							<element minOccurs="0" name="WeeklyBillCycleDay" nillable="true" type="string" />
 						</sequence>
 					</extension>
 				</complexContent>
@@ -875,6 +876,7 @@
 							<element minOccurs="0" name="UsageRecordRatingOption" nillable="true" type="string"  />
 			               	<element minOccurs="0" name="UseDiscountSpecificAccountingCode" nillable="true" type="boolean"  />
 			               	<element minOccurs="0" name="Version" nillable="true" type="long" />
+			               	<element minOccurs="0" name="WeeklyBillCycleDay" nillable="true" type="string" />
 						</sequence>
 					</extension>
 				</complexContent>
@@ -1025,6 +1027,7 @@
             <complexContent>
              <extension base="ons:zObject">
                 <sequence>
+                	  <element minOccurs="0" name="ConvertToCurrencies" nillable="true" type="string" />
                       <element minOccurs="0" name="CreatedById" nillable="true" type="zns:ID"/>
                       <element minOccurs="0" name="CreatedDate" nillable="true" type="dateTime"/>
                       <element minOccurs="0" name="Encrypted" nillable="true" type="xs:boolean" />
@@ -1991,7 +1994,7 @@
 	</binding>
 	<service name="ZuoraService">
 		<port name="Soap" binding="zns:SoapBinding">
-			<soap:address location="https://apisandbox.zuora.com/apps/services/a/78.0" />
+			<soap:address location="https://apisandbox.zuora.com/apps/services/a/79.0" />
 		</port>
 	</service>
 </definitions>

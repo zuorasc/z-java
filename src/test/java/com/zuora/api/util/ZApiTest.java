@@ -196,6 +196,19 @@ public class ZApiTest {
 		
 	}
 
+
+	@Test
+	public void filterProduct() {
+
+		ZApi zapi = new ZApi();
+
+		// This should be called before any other call
+		zapi.zLogin();
+
+		// Example on how to do a query
+		QueryResult result = zapi.zQuery("Select id, titlekey__c from ProductRatePlan where id= '2c92c0f9555351c1015558ac83b36b31'");
+	}
+
 	/**
 	 * Make account.
 	 *

@@ -129,7 +129,7 @@
                 </executions>
                 <configuration>
                     <packageName>com.zuora.api.axis2</packageName>
-                    <wsdlFile>src/main/wsdl/zuora.a.78.0.wsdl</wsdlFile>
+                    <wsdlFile>src/main/wsdl/zuora.a.79.0.wsdl</wsdlFile>
                     <databindingName>adb</databindingName>
                     <outputDirectory>target/generated-sources/java</outputDirectory>
                 </configuration>
