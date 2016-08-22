@@ -36,8 +36,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
 
 public class ZApiTest {
 
@@ -194,6 +193,22 @@ public class ZApiTest {
 
 		logger.info("Successfully deleted the test account");
 		
+	}
+
+	@Test
+	public void zAdvancedQuery() {
+		ZApi zapi = new ZApi();
+
+		// This should be called before any other call
+		zapi.zLogin();
+
+		QueryResult resultado = zapi.zQuery("select id from invoiceitem");
+
+		// Example on how to do a query
+		List result = zapi.zAdvancedQuery("select id from invoiceitem");
+
+		Assert.assertEquals(result.size(), resultado.getSize());
+
 	}
 
 

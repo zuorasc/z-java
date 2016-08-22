@@ -1,6 +1,9 @@
 package com.zuora.api.util;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.ServiceClient;
@@ -287,6 +290,7 @@ public class ZApi {
 
 		// Prepares the query
 		QueryMore query = new QueryMore();
+		query.setQueryLocator(queryLocator);
 
 		try {
 			QueryMoreResponse resp = stub.queryMore(query, null, header);
@@ -305,6 +309,24 @@ public class ZApi {
 		}
 
 		return result;
+	}
+
+	public List zAdvancedQuery(String queryString) {
+
+        List objects = new ArrayList();
+
+		QueryResult result = zQuery(queryString);
+
+		Collections.addAll(objects, result.getRecords());
+
+		while(!result.getDone()) {
+			result = zQueryMore(result.getQueryLocator());
+            Collections.addAll(objects, result.getRecords());
+
+		}
+
+		return objects;
+
 	}
 
 	/**
