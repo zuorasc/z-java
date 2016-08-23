@@ -40,555 +40,563 @@ import com.zuora.api.axis2.ZuoraServiceStub.ZObject;
 
 public class ZApi {
 
-	/** The logger. */
-	private static Logger logger = LoggerFactory.getLogger(ZApi.class);
+    /**
+     * The logger.
+     */
+    private static Logger logger = LoggerFactory.getLogger(ZApi.class);
 
-	/** The Constant PROPERTY_ENDPOINT. */
-	private static final String PROPERTY_ENDPOINT = "endpoint";
+    /**
+     * The Constant PROPERTY_ENDPOINT.
+     */
+    private static final String PROPERTY_ENDPOINT = "endpoint";
 
-	/** The Constant PROPERTY_USERNAME. */
-	private static final String PROPERTY_USERNAME = "username";
+    /**
+     * The Constant PROPERTY_USERNAME.
+     */
+    private static final String PROPERTY_USERNAME = "username";
 
-	/** The Constant PROPERTY_PASSWORD. */
-	private static final String PROPERTY_PASSWORD = "password";
+    /**
+     * The Constant PROPERTY_PASSWORD.
+     */
+    private static final String PROPERTY_PASSWORD = "password";
 
-	/** Max number of objects per call (except QUERY) */
-	public static final int MAX_OBJECTS = 50;
+    /**
+     * Max number of objects per call (except QUERY)
+     */
+    public static final int MAX_OBJECTS = 50;
 
-	/** The stub. */
-	private ZuoraServiceStub stub;
+    /**
+     * The stub.
+     */
+    private ZuoraServiceStub stub;
 
-	/** The header. */
-	private SessionHeader header;
+    /**
+     * The header.
+     */
+    private SessionHeader header;
 
-	/** The endpoint used. */
-	private String endpoint;
+    /**
+     * The endpoint used.
+     */
+    private String endpoint;
 
-	/**
-	 * Instantiates a new Zuora API Helper
-	 */
-	public ZApi() {
+    /**
+     * Instantiates a new Zuora API Helper
+     */
+    public ZApi() {
 
-		logger.info("Creating a new ZAPI object");
+        logger.info("Creating a new ZAPI object");
 
-		try {
-			setStub(new ZuoraServiceStub());
+        try {
+            setStub(new ZuoraServiceStub());
 
-			// set new ENDPOINT
-			setEndpoint(ZuoraUtility.getPropertyValue(PROPERTY_ENDPOINT));
+            // set new ENDPOINT
+            setEndpoint(ZuoraUtility.getPropertyValue(PROPERTY_ENDPOINT));
 
-			if (endpoint != null && endpoint.trim().length() > 0) {
-				ServiceClient client = stub._getServiceClient();
-				client.getOptions().getTo().setAddress(endpoint);
-			}
+            if (endpoint != null && endpoint.trim().length() > 0) {
+                ServiceClient client = stub._getServiceClient();
+                client.getOptions().getTo().setAddress(endpoint);
+            }
 
-		} catch (AxisFault e) {
-			logger.error(e.getMessage());
-		}
+        } catch (AxisFault e) {
+            logger.error(e.getMessage());
+        }
 
-	}
+    }
 
-	/**
-	 * Overloaded method to specify the endpoint instead of reading from the
-	 * config.properties file
-	 * 
-	 * @param endpoint
-	 *            Specify the endpoint (Zuora) to connect to
-	 */
-	public ZApi(String endpoint) {
+    /**
+     * Overloaded method to specify the endpoint instead of reading from the
+     * config.properties file
+     *
+     * @param endpoint Specify the endpoint (Zuora) to connect to
+     */
+    public ZApi(String endpoint) {
 
-		logger.info("Creating a new ZAPI object");
+        logger.info("Creating a new ZAPI object");
 
-		try {
-			setStub(new ZuoraServiceStub());
+        try {
+            setStub(new ZuoraServiceStub());
 
-			// set new ENDPOINT
-			setEndpoint(endpoint);
+            // set new ENDPOINT
+            setEndpoint(endpoint);
 
-			if (endpoint != null && endpoint.trim().length() > 0) {
-				ServiceClient client = stub._getServiceClient();
-				client.getOptions().getTo().setAddress(endpoint);
-			}
+            if (endpoint != null && endpoint.trim().length() > 0) {
+                ServiceClient client = stub._getServiceClient();
+                client.getOptions().getTo().setAddress(endpoint);
+            }
 
-		} catch (AxisFault e) {
-			logger.error(e.getMessage());
-		}
+        } catch (AxisFault e) {
+            logger.error(e.getMessage());
+        }
 
-	}
+    }
 
-	/**
-	 * zLogin.
-	 * 
-	 * @return LoginResult object
-	 */
-	public LoginResult zLogin() {
+    /**
+     * zLogin.
+     *
+     * @return LoginResult object
+     */
+    public LoginResult zLogin() {
 
-		String username = ZuoraUtility.getPropertyValue(PROPERTY_USERNAME);
-		String password = ZuoraUtility.getPropertyValue(PROPERTY_PASSWORD);
+        String username = ZuoraUtility.getPropertyValue(PROPERTY_USERNAME);
+        String password = ZuoraUtility.getPropertyValue(PROPERTY_PASSWORD);
 
-		logger.debug("Username = " + username + " | Password = " + password);
+        logger.debug("Username = " + username + " | Password = " + password);
 
-		return zLogin(username, password);
-	}
+        return zLogin(username, password);
+    }
 
-	/**
-	 * Overloaded zLogin call to pass username/password credentials instead of
-	 * reading from config.properties file
-	 * 
-	 * @param username
-	 *            Zuora API user
-	 * @param password
-	 *            Zuora API password
-	 * @return LoginResult object
-	 */
-	public LoginResult zLogin(String username, String password) {
+    /**
+     * Overloaded zLogin call to pass username/password credentials instead of
+     * reading from config.properties file
+     *
+     * @param username Zuora API user
+     * @param password Zuora API password
+     * @return LoginResult object
+     */
+    public LoginResult zLogin(String username, String password) {
 
-		LoginResult result = null;
+        LoginResult result = null;
 
-		// Prepare the login request
-		Login login = new Login();
+        // Prepare the login request
+        Login login = new Login();
 
-		login.setUsername(username);
-		login.setPassword(password);
+        login.setUsername(username);
+        login.setPassword(password);
 
-		// Get the response from Zuora
-		LoginResponse resp;
+        // Get the response from Zuora
+        LoginResponse resp;
 
-		try {
+        try {
 
-			resp = stub.login(login);
-			result = resp.getResult();
+            resp = stub.login(login);
+            result = resp.getResult();
 
-			// Create session for all subsequent calls
-			setHeader(new SessionHeader());
-			getHeader().setSession(result.getSession());
+            // Create session for all subsequent calls
+            setHeader(new SessionHeader());
+            getHeader().setSession(result.getSession());
 
-			logger.info("User `" + ZuoraUtility.getPropertyValue(PROPERTY_USERNAME) + "` successfully connected!");
+            logger.info("User `" + ZuoraUtility.getPropertyValue(PROPERTY_USERNAME) + "` successfully connected!");
 
-		} catch (RemoteException e) {
-			logger.error("Remote error while trying to login | " + e.getMessage());
+        } catch (RemoteException e) {
+            logger.error("Remote error while trying to login | " + e.getMessage());
 
-		} catch (UnexpectedErrorFault e) {
-			logger.error("Unexpected Error Fault | " + e.getMessage());
+        } catch (UnexpectedErrorFault e) {
+            logger.error("Unexpected Error Fault | " + e.getMessage());
 
-		} catch (LoginFault e) {
-			logger.error("Login Fault | " + e.getMessage());
-		}
+        } catch (LoginFault e) {
+            logger.error("Login Fault | " + e.getMessage());
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	/**
-	 * Do a query to Zuora and return the result (no more than 2,000 objects)
-	 * 
-	 * @param queryString
-	 *            The ZOQL query string
-	 * @return The query result
-	 */
-	public QueryResult zQuery(String queryString) {
+    /**
+     * Do a query to Zuora and return the result (no more than 2,000 objects)
+     *
+     * @param queryString The ZOQL query string
+     * @return The query result
+     */
+    public QueryResult zQuery(String queryString) {
 
-		QueryResult result = null;
+        QueryResult result = null;
 
-		// Prepare the query
-		Query query = new Query();
+        // Prepare the query
+        Query query = new Query();
 
-		query.setQueryString(queryString);
-		logger.debug("Query String = " + queryString);
+        query.setQueryString(queryString);
+        logger.debug("Query String = " + queryString);
 
-		// We set `null` for the 2nd parameter to return max. 2000 objects
-		try {
-			QueryResponse resp = stub.query(query, null, header);
-			result = resp.getResult();
-			logger.info("Query returned " + result.getSize() + " values");
+        // We set `null` for the 2nd parameter to return max. 2000 objects
+        try {
+            QueryResponse resp = stub.query(query, null, header);
+            result = resp.getResult();
+            logger.info("Query returned " + result.getSize() + " values");
 
-		} catch (RemoteException e) {
-			logger.error("Remote Exception | " + e.getMessage());
+        } catch (RemoteException e) {
+            logger.error("Remote Exception | " + e.getMessage());
 
-		} catch (MalformedQueryFault e) {
-			logger.error("Malformed Query | " + e.getMessage());
+        } catch (MalformedQueryFault e) {
+            logger.error("Malformed Query | " + e.getMessage());
 
-		} catch (UnexpectedErrorFault e) {
-			logger.error("Unexpected Error Fault | " + e.getMessage());
+        } catch (UnexpectedErrorFault e) {
+            logger.error("Unexpected Error Fault | " + e.getMessage());
 
-		} catch (InvalidQueryLocatorFault e) {
-			logger.error("Invalid Query Locator | " + e.getMessage());
+        } catch (InvalidQueryLocatorFault e) {
+            logger.error("Invalid Query Locator | " + e.getMessage());
 
-		}
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	/**
-	 * Create subscription(s) in Zuora using API call
-	 *
-	 * @param objects
-	 *            array of SubscriptionRequest to create
-	 * @return SubscribeResult or null if an error occured
-	 */
-	public ZuoraServiceStub.SubscribeResult[] zSubscribe(ZuoraServiceStub.SubscribeRequest[] objects) throws UnexpectedErrorFault, RemoteException {
+    /**
+     * Create subscription(s) in Zuora using API call
+     *
+     * @param objects array of SubscriptionRequest to create
+     * @return SubscribeResult or null if an error occured
+     */
+    public ZuoraServiceStub.SubscribeResult[] zSubscribe(ZuoraServiceStub.SubscribeRequest[] objects) throws UnexpectedErrorFault, RemoteException {
 
-		ZuoraServiceStub.SubscribeResult[] subscribeResult = null;
+        ZuoraServiceStub.SubscribeResult[] subscribeResult = null;
 
-		try {
-			if (objects.length > MAX_OBJECTS) {
+        try {
+            if (objects.length > MAX_OBJECTS) {
 
 //                subscribeResult = new SubscribeResult[objects.length];
 
-				ZuoraServiceStub.Subscribe subscribe = new ZuoraServiceStub.Subscribe();
-				subscribe.setSubscribes(objects);
-				ZuoraServiceStub.SubscribeResponse resp = stub.subscribe(subscribe, this.header);
-				subscribeResult = resp.getResult();
-			} else {
+                ZuoraServiceStub.Subscribe subscribe = new ZuoraServiceStub.Subscribe();
+                subscribe.setSubscribes(objects);
+                ZuoraServiceStub.SubscribeResponse resp = stub.subscribe(subscribe, this.header);
+                subscribeResult = resp.getResult();
+            } else {
 
-				ZuoraServiceStub.Subscribe create = new ZuoraServiceStub.Subscribe();
-				create.setSubscribes(objects);
+                ZuoraServiceStub.Subscribe create = new ZuoraServiceStub.Subscribe();
+                create.setSubscribes(objects);
 
-				ZuoraServiceStub.SubscribeResponse createResponse;
-				createResponse = stub.subscribe(create, this.header);
-				subscribeResult = createResponse.getResult();
-			}
-		} catch (UnexpectedErrorFault e) {
-			logger.error("Unexpected error | " + e.getFaultMessage());
+                ZuoraServiceStub.SubscribeResponse createResponse;
+                createResponse = stub.subscribe(create, this.header);
+                subscribeResult = createResponse.getResult();
+            }
+        } catch (UnexpectedErrorFault e) {
+            logger.error("Unexpected error | " + e.getFaultMessage());
 
-		} catch (RemoteException e) {
-			logger.error("Remote Exception | " + e.getMessage());
-		} catch (Exception e) {
-			logger.error("Exception | " + e.getMessage());
-		}
+        } catch (RemoteException e) {
+            logger.error("Remote Exception | " + e.getMessage());
+        } catch (Exception e) {
+            logger.error("Exception | " + e.getMessage());
+        }
 
-		if (subscribeResult != null) {
-			logger.debug("Successfully received " + subscribeResult.length + " subscribe result(s).");
+        if (subscribeResult != null) {
+            logger.debug("Successfully received " + subscribeResult.length + " subscribe result(s).");
 
-			for (ZuoraServiceStub.SubscribeResult result : subscribeResult) {
-				if (!result.getSuccess()) {
-					logger.error("Create call failed with the following errors:");
-					for (com.zuora.api.axis2.ZuoraServiceStub.Error error : result.getErrors()) {
-						logger.error("field: " + error.getField() + " | message: " + error.getMessage() + " | code: "
-								+ error.getCode());
-					}
-				}
-			}
+            for (ZuoraServiceStub.SubscribeResult result : subscribeResult) {
+                if (!result.getSuccess()) {
+                    logger.error("Create call failed with the following errors:");
+                    for (com.zuora.api.axis2.ZuoraServiceStub.Error error : result.getErrors()) {
+                        logger.error("field: " + error.getField() + " | message: " + error.getMessage() + " | code: "
+                                + error.getCode());
+                    }
+                }
+            }
 
-		} else {
-			logger.error("Null object received during zSubscribe() operation");
-		}
+        } else {
+            logger.error("Null object received during zSubscribe() operation");
+        }
 
-		return subscribeResult;
-	}
+        return subscribeResult;
+    }
 
-	/**
-	 * Requests aditional result from a previous query() call.
-	 *
-	 * @param queryLocator
-	 * 			QueryLocator from the query call
-	 *
-	 * @return The query result
+    /**
+     * Requests aditional result from a previous query() call.
+     *
+     * @param queryLocator QueryLocator from the query call
+     * @return The query result
      */
-	public QueryResult zQueryMore(QueryLocator queryLocator) {
+    public QueryResult zQueryMore(QueryLocator queryLocator) {
 
-		QueryResult result = null;
+        QueryResult result = null;
 
-		// Prepares the query
-		QueryMore query = new QueryMore();
-		query.setQueryLocator(queryLocator);
+        // Prepares the query
+        QueryMore query = new QueryMore();
+        query.setQueryLocator(queryLocator);
 
-		try {
-			QueryMoreResponse resp = stub.queryMore(query, null, header);
-			result = resp.getResult();
-			logger.info("Query returned " + result.getSize() + " values");
+        try {
+            QueryMoreResponse resp = stub.queryMore(query, null, header);
+            result = resp.getResult();
+            logger.info("Query returned " + result.getSize() + " values");
 
-		} catch (RemoteException e) {
-			logger.error("Remote Exception | " + e.getMessage());
+        } catch (RemoteException e) {
+            logger.error("Remote Exception | " + e.getMessage());
 
-		} catch (UnexpectedErrorFault e) {
-			logger.error("Unexpected Error Fault | " + e.getMessage());
+        } catch (UnexpectedErrorFault e) {
+            logger.error("Unexpected Error Fault | " + e.getMessage());
 
-		} catch (InvalidQueryLocatorFault e) {
-			logger.error("Invalid Query Locator | " + e.getMessage());
+        } catch (InvalidQueryLocatorFault e) {
+            logger.error("Invalid Query Locator | " + e.getMessage());
 
-		}
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	public List zAdvancedQuery(String queryString) {
+    public List zAdvancedQuery(String queryString) {
 
-		List objects = new ArrayList();
+        List objects = new ArrayList();
 
-		QueryResult result = zQuery(queryString);
+        QueryResult result = zQuery(queryString);
 
-		if (result.getSize()>0) {
+        if (result != null) {
 
-			Collections.addAll(objects, result.getRecords());
+            if (result.getSize() > 0) {
 
-			while(!result.getDone()) {
-				result = zQueryMore(result.getQueryLocator());
-				Collections.addAll(objects, result.getRecords());
+                Collections.addAll(objects, result.getRecords());
 
-			}
-		}
+                while (!result.getDone()) {
+                    result = zQueryMore(result.getQueryLocator());
+                    Collections.addAll(objects, result.getRecords());
 
-		return objects;
+                }
+            }
+        }
 
-	}
+        return objects;
 
-	/**
-	 * Create object(s) in Zuora using API call
-	 * 
-	 * @param objects
-	 *            array of objects to create
-	 * @return SaveResult or null if an error occured
-	 */
-	public SaveResult[] zCreate(ZObject[] objects) {
+    }
 
-		SaveResult[] saveResult = null;
+    /**
+     * Create object(s) in Zuora using API call
+     *
+     * @param objects array of objects to create
+     * @return SaveResult or null if an error occured
+     */
+    public SaveResult[] zCreate(ZObject[] objects) {
 
-		try {
-			// If there is more than MAX_OBJECTS to create we split the call and
-			// then merge back the result
-			if (objects.length > MAX_OBJECTS) {
+        SaveResult[] saveResult = null;
 
-				// Get the objects in split tables
-				ZObject[][] splittedObjects = ZuoraUtility.splitObjects(objects);
+        try {
+            // If there is more than MAX_OBJECTS to create we split the call and
+            // then merge back the result
+            if (objects.length > MAX_OBJECTS) {
 
-				saveResult = new SaveResult[objects.length];
+                // Get the objects in split tables
+                ZObject[][] splittedObjects = ZuoraUtility.splitObjects(objects);
 
-				// For each sub table, create() API call
-				for (int i = 0; i < splittedObjects.length; i++) {
+                saveResult = new SaveResult[objects.length];
 
-					// Prepare the create object
-					Create create = new Create();
-					create.setZObjects(splittedObjects[i]);
+                // For each sub table, create() API call
+                for (int i = 0; i < splittedObjects.length; i++) {
 
-					CreateResponse createResponse = stub.create(create, null, header);
-					SaveResult[] tmpSaveResult = createResponse.getResult();
+                    // Prepare the create object
+                    Create create = new Create();
+                    create.setZObjects(splittedObjects[i]);
 
-					// Save the tmp result in the final table result returned
-					for (int j = 0; j < tmpSaveResult.length; j++) {
-						saveResult[(i * MAX_OBJECTS) + j] = tmpSaveResult[j];
-					}
-				}
+                    CreateResponse createResponse = stub.create(create, null, header);
+                    SaveResult[] tmpSaveResult = createResponse.getResult();
 
-			} else {
+                    // Save the tmp result in the final table result returned
+                    for (int j = 0; j < tmpSaveResult.length; j++) {
+                        saveResult[(i * MAX_OBJECTS) + j] = tmpSaveResult[j];
+                    }
+                }
 
-				// Prepare the create object
-				Create create = new Create();
-				create.setZObjects(objects);
+            } else {
 
-				CreateResponse createResponse = stub.create(create, null, header);
-				saveResult = createResponse.getResult();
+                // Prepare the create object
+                Create create = new Create();
+                create.setZObjects(objects);
 
-			}
+                CreateResponse createResponse = stub.create(create, null, header);
+                saveResult = createResponse.getResult();
 
-		} catch (UnexpectedErrorFault e) {
-			logger.error("Unexpected error | " + e.getFaultMessage());
+            }
 
-		} catch (InvalidTypeFault e) {
-			logger.error("Invalid Type Fault | " + e.getFaultMessage());
-
-		} catch (RemoteException e) {
-			logger.error("Remote Exception | " + e.getMessage());
-		}
-
-		if (saveResult != null) {
-			logger.debug("Successfully received " + saveResult.length + " save result(s).");
-		} else {
-			logger.error("Null object received during zCreate() operation");
-		}
-
-		// If an error occurred, log it
-		for (SaveResult result : saveResult) {
-			if (!result.getSuccess()) {
-				logger.error("Create call failed with the following errors:");
-				for (com.zuora.api.axis2.ZuoraServiceStub.Error error : result.getErrors()) {
-					logger.error("field: " + error.getField() + " | message: " + error.getMessage() + " | code: "
-							+ error.getCode());
-				}
-			}
-		}
-
-		return saveResult;
-	}
-
-	/**
-	 * Update object(s) in Zuora using API calls
-	 * 
-	 * @param objects
-	 *            array of objects to update (must have their Zuora IDs set)
-	 * @return SaveResult or null if an error occured
-	 */
-	public SaveResult[] zUpdate(ZObject[] objects) {
-
-		SaveResult[] saveResult = null;
-
-		try {
-			// If there is more than MAX_OBJECTS to create we split the call and
-			// then merge back the result
-			if (objects.length > MAX_OBJECTS) {
-
-				// Get the objects in split tables
-				ZObject[][] splittedObjects = ZuoraUtility.splitObjects(objects);
-
-				saveResult = new SaveResult[objects.length];
-
-				// For each sub table, create() API call
-				for (int i = 0; i < splittedObjects.length; i++) {
-
-					// Prepare the create object
-					Update update = new Update();
-					update.setZObjects(splittedObjects[i]);
-
-					UpdateResponse updateResponse = stub.update(update, header);
-					SaveResult[] tmpSaveResult = updateResponse.getResult();
-
-					// Save the tmp result in the final table result returned
-					for (int j = 0; j < tmpSaveResult.length; j++) {
-						saveResult[(i * MAX_OBJECTS) + j] = tmpSaveResult[j];
-					}
-				}
-
-			} else {
-
-				// Prepare the create object
-				Update update = new Update();
-				update.setZObjects(objects);
-
-				UpdateResponse updateResponse = stub.update(update, header);
-				saveResult = updateResponse.getResult();
-			}
-
-		} catch (UnexpectedErrorFault e) {
-			logger.error("Unexpected error | " + e.getFaultMessage());
-
-		} catch (InvalidTypeFault e) {
-			logger.error("Invalid Type Fault | " + e.getFaultMessage());
-
-		} catch (RemoteException e) {
-			logger.error("Remote Exception | " + e.getMessage());
-		}
-
-		if (saveResult != null) {
-			logger.debug("Successfully received " + saveResult.length + " save result(s).");
-		} else {
-			logger.error("Null object received during zCreate() operation");
-		}
-
-		// If an error occurred, log it
-		for (SaveResult result : saveResult) {
-			if (!result.getSuccess()) {
-				logger.error("Create call failed with the following errors:");
-				for (com.zuora.api.axis2.ZuoraServiceStub.Error error : result.getErrors()) {
-					logger.error("field: " + error.getField() + " | message: " + error.getMessage() + " | code: "
-							+ error.getCode());
-				}
-			}
-		}
-
-		return saveResult;
-	}
-
-	/**
-	 * Delete object(s) in Zuora using API calls
-	 * 
-	 * @param ids
-	 *            Zuora ID of object to delete
-	 * @param type
-	 *            can be Account, Subscription, etc.
-	 * @return Delete Result if success, null if an error occurred
-	 */
-	public DeleteResult[] zDelete(String[] ids, String type) {
-
-		DeleteResult[] deleteResult = null;
-
-		try {
-
-			// If there is more than MAX_OBJECTS to create we split the call and
-			// then merge back the result
-			if (ids.length > MAX_OBJECTS) {
-
-				// Get the objects in split tables
-				String[][] splittedIds = ZuoraUtility.splitIds(ids);
-
-				deleteResult = new DeleteResult[ids.length];
-
-				// For each sub table, create() API call
-				for (int i = 0; i < splittedIds.length; i++) {
-
-					// Convert the IDs to Zuora IDs
-					ID[] zuoraIds = ZuoraUtility.stringToZuoraId(splittedIds[i]);
-
-					// Prepare the delete object
-					Delete delete = new Delete();
-					delete.setType(type);
-					delete.setIds(zuoraIds);
-
-					DeleteResponse deleteResponse = stub.delete(delete, header);
-					DeleteResult[] tmpDeleteResult = deleteResponse.getResult();
-
-					// Save the tmp result in the final table result returned
-					for (int j = 0; j < tmpDeleteResult.length; j++) {
-						deleteResult[(i * MAX_OBJECTS) + j] = tmpDeleteResult[j];
-					}
-				}
-
-			} else {
-				// Convert the IDs to Zuora IDs
-				ID[] zuoraIds = ZuoraUtility.stringToZuoraId(ids);
-
-				// Prepare the delete object
-				Delete delete = new Delete();
-				delete.setType(type);
-				delete.setIds(zuoraIds);
-
-				DeleteResponse deleteResponse = stub.delete(delete, header);
-				deleteResult = deleteResponse.getResult();
-			}
-
-		} catch (InvalidValueFault e) {
-			logger.error("Invalid Value | " + e.getFaultMessage());
-
-		} catch (UnexpectedErrorFault e) {
-			logger.error("Unexpected error | " + e.getFaultMessage());
-
-		} catch (InvalidTypeFault e) {
-			logger.error("Invalid Type Fault | " + e.getFaultMessage());
-
-		} catch (RemoteException e) {
-			logger.error("Remote Exception | " + e.getMessage());
-		}
-
-		if (deleteResult != null)
-			logger.info("Successfully deleted " + deleteResult.length + " zObject(s)");
-		else
-			logger.error("An error occurred during the zDelete() call");
-
-		return deleteResult;
-	}
-
-	// --- Setter(s) & Getter(s) ---
-
-	public ZuoraServiceStub getStub() {
-		return stub;
-	}
-
-	private void setStub(ZuoraServiceStub stub) {
-		this.stub = stub;
-	}
-
-	public SessionHeader getHeader() {
-		return header;
-	}
-
-	private void setHeader(SessionHeader header) {
-		this.header = header;
-	}
-
-	public String getEndpoint() {
-		return endpoint;
-	}
-
-	private void setEndpoint(String endpoint) {
-		this.endpoint = endpoint;
-	}
+        } catch (UnexpectedErrorFault e) {
+            logger.error("Unexpected error | " + e.getFaultMessage());
+
+        } catch (InvalidTypeFault e) {
+            logger.error("Invalid Type Fault | " + e.getFaultMessage());
+
+        } catch (RemoteException e) {
+            logger.error("Remote Exception | " + e.getMessage());
+        }
+
+        if (saveResult != null) {
+            logger.debug("Successfully received " + saveResult.length + " save result(s).");
+        } else {
+            logger.error("Null object received during zCreate() operation");
+        }
+
+        // If an error occurred, log it
+        for (SaveResult result : saveResult) {
+            if (!result.getSuccess()) {
+                logger.error("Create call failed with the following errors:");
+                for (com.zuora.api.axis2.ZuoraServiceStub.Error error : result.getErrors()) {
+                    logger.error("field: " + error.getField() + " | message: " + error.getMessage() + " | code: "
+                            + error.getCode());
+                }
+            }
+        }
+
+        return saveResult;
+    }
+
+    /**
+     * Update object(s) in Zuora using API calls
+     *
+     * @param objects array of objects to update (must have their Zuora IDs set)
+     * @return SaveResult or null if an error occured
+     */
+    public SaveResult[] zUpdate(ZObject[] objects) {
+
+        SaveResult[] saveResult = null;
+
+        try {
+            // If there is more than MAX_OBJECTS to create we split the call and
+            // then merge back the result
+            if (objects.length > MAX_OBJECTS) {
+
+                // Get the objects in split tables
+                ZObject[][] splittedObjects = ZuoraUtility.splitObjects(objects);
+
+                saveResult = new SaveResult[objects.length];
+
+                // For each sub table, create() API call
+                for (int i = 0; i < splittedObjects.length; i++) {
+
+                    // Prepare the create object
+                    Update update = new Update();
+                    update.setZObjects(splittedObjects[i]);
+
+                    UpdateResponse updateResponse = stub.update(update, header);
+                    SaveResult[] tmpSaveResult = updateResponse.getResult();
+
+                    // Save the tmp result in the final table result returned
+                    for (int j = 0; j < tmpSaveResult.length; j++) {
+                        saveResult[(i * MAX_OBJECTS) + j] = tmpSaveResult[j];
+                    }
+                }
+
+            } else {
+
+                // Prepare the create object
+                Update update = new Update();
+                update.setZObjects(objects);
+
+                UpdateResponse updateResponse = stub.update(update, header);
+                saveResult = updateResponse.getResult();
+            }
+
+        } catch (UnexpectedErrorFault e) {
+            logger.error("Unexpected error | " + e.getFaultMessage());
+
+        } catch (InvalidTypeFault e) {
+            logger.error("Invalid Type Fault | " + e.getFaultMessage());
+
+        } catch (RemoteException e) {
+            logger.error("Remote Exception | " + e.getMessage());
+        }
+
+        if (saveResult != null) {
+            logger.debug("Successfully received " + saveResult.length + " save result(s).");
+        } else {
+            logger.error("Null object received during zCreate() operation");
+        }
+
+        // If an error occurred, log it
+        for (SaveResult result : saveResult) {
+            if (!result.getSuccess()) {
+                logger.error("Create call failed with the following errors:");
+                for (com.zuora.api.axis2.ZuoraServiceStub.Error error : result.getErrors()) {
+                    logger.error("field: " + error.getField() + " | message: " + error.getMessage() + " | code: "
+                            + error.getCode());
+                }
+            }
+        }
+
+        return saveResult;
+    }
+
+    /**
+     * Delete object(s) in Zuora using API calls
+     *
+     * @param ids  Zuora ID of object to delete
+     * @param type can be Account, Subscription, etc.
+     * @return Delete Result if success, null if an error occurred
+     */
+    public DeleteResult[] zDelete(String[] ids, String type) {
+
+        DeleteResult[] deleteResult = null;
+
+        try {
+
+            // If there is more than MAX_OBJECTS to create we split the call and
+            // then merge back the result
+            if (ids.length > MAX_OBJECTS) {
+
+                // Get the objects in split tables
+                String[][] splittedIds = ZuoraUtility.splitIds(ids);
+
+                deleteResult = new DeleteResult[ids.length];
+
+                // For each sub table, create() API call
+                for (int i = 0; i < splittedIds.length; i++) {
+
+                    // Convert the IDs to Zuora IDs
+                    ID[] zuoraIds = ZuoraUtility.stringToZuoraId(splittedIds[i]);
+
+                    // Prepare the delete object
+                    Delete delete = new Delete();
+                    delete.setType(type);
+                    delete.setIds(zuoraIds);
+
+                    DeleteResponse deleteResponse = stub.delete(delete, header);
+                    DeleteResult[] tmpDeleteResult = deleteResponse.getResult();
+
+                    // Save the tmp result in the final table result returned
+                    for (int j = 0; j < tmpDeleteResult.length; j++) {
+                        deleteResult[(i * MAX_OBJECTS) + j] = tmpDeleteResult[j];
+                    }
+                }
+
+            } else {
+                // Convert the IDs to Zuora IDs
+                ID[] zuoraIds = ZuoraUtility.stringToZuoraId(ids);
+
+                // Prepare the delete object
+                Delete delete = new Delete();
+                delete.setType(type);
+                delete.setIds(zuoraIds);
+
+                DeleteResponse deleteResponse = stub.delete(delete, header);
+                deleteResult = deleteResponse.getResult();
+            }
+
+        } catch (InvalidValueFault e) {
+            logger.error("Invalid Value | " + e.getFaultMessage());
+
+        } catch (UnexpectedErrorFault e) {
+            logger.error("Unexpected error | " + e.getFaultMessage());
+
+        } catch (InvalidTypeFault e) {
+            logger.error("Invalid Type Fault | " + e.getFaultMessage());
+
+        } catch (RemoteException e) {
+            logger.error("Remote Exception | " + e.getMessage());
+        }
+
+        if (deleteResult != null)
+            logger.info("Successfully deleted " + deleteResult.length + " zObject(s)");
+        else
+            logger.error("An error occurred during the zDelete() call");
+
+        return deleteResult;
+    }
+
+    // --- Setter(s) & Getter(s) ---
+
+    public ZuoraServiceStub getStub() {
+        return stub;
+    }
+
+    private void setStub(ZuoraServiceStub stub) {
+        this.stub = stub;
+    }
+
+    public SessionHeader getHeader() {
+        return header;
+    }
+
+    private void setHeader(SessionHeader header) {
+        this.header = header;
+    }
+
+    public String getEndpoint() {
+        return endpoint;
+    }
+
+    private void setEndpoint(String endpoint) {
+        this.endpoint = endpoint;
+    }
 
 }
