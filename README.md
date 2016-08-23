@@ -51,6 +51,13 @@ Using a custom/different WSDL
 2. Edit the `pom.xml` file `line 123` and change the value for your WSDL name
 3. `mvn package` and that's it!
 
+## WSDL 79.0
+
+This WSDL has changed some attributes in method **Subscription** (PLEASE MANTAIN THIS CHANGES WHEN UPDATE WSDL):
+-  **ContractEffectiveDay**  date -> string
+-  **ServiceActivationDate**   date -> string
+-  **TermStartDate**   date -> string
+
 
 Installing it locally
 ---------------------
