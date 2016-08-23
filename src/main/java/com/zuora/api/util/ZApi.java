@@ -313,16 +313,19 @@ public class ZApi {
 
 	public List zAdvancedQuery(String queryString) {
 
-        List objects = new ArrayList();
+		List objects = new ArrayList();
 
 		QueryResult result = zQuery(queryString);
 
-		Collections.addAll(objects, result.getRecords());
+		if (result.getSize()>0) {
 
-		while(!result.getDone()) {
-			result = zQueryMore(result.getQueryLocator());
-            Collections.addAll(objects, result.getRecords());
+			Collections.addAll(objects, result.getRecords());
 
+			while(!result.getDone()) {
+				result = zQueryMore(result.getQueryLocator());
+				Collections.addAll(objects, result.getRecords());
+
+			}
 		}
 
 		return objects;
