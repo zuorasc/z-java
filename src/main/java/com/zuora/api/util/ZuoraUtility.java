@@ -25,6 +25,8 @@ public class ZuoraUtility {
 	/** Filename for properties file. */
 	private static final String FILE_PROPERTY_NAME = "application.yml";
 
+	private static final String VERSION = "79.0";
+
 	/** The properties, loaded from the file. */
 	private static Properties properties = null;
 
@@ -45,7 +47,8 @@ public class ZuoraUtility {
 
 			properties.setProperty("username", (String)soap.get("username"));
 			properties.setProperty("password", (String)soap.get("password"));
-			properties.setProperty("endpoint", (String)soap.get("endpoint"));
+			String endpoint = "https://" + soap.get("host") + "/apps/services/a/" + VERSION;
+			properties.setProperty("endpoint", endpoint);
 		} catch (IOException e) {
 			logger.error("error obtain file: " + e.getMessage());
 		}

@@ -3,4 +3,4 @@ external:
     soap:
       username: APIUser@abaenglish.com
       password: 1QA2ws2ws3ed
-      endpoint: https://apisandbox.zuora.com/apps/services/a/79.0
+      host: apisandbox.zuora.com
