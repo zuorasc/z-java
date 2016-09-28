@@ -3,7 +3,7 @@
 
     <groupId>com.zuora</groupId>
     <artifactId>z-java</artifactId>
-    <version>1.0.10</version>
+    <version>1.0.12</version>
     <packaging>jar</packaging>
 
     <name>z-java</name>
