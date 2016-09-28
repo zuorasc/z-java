@@ -14,6 +14,19 @@
     </properties>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.springframework/spring-core -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>4.3.3.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.17</version>
+        </dependency>
+
         <!-- Unit test only -->
         <dependency>
             <groupId>junit</groupId>
@@ -129,7 +142,7 @@
                 </executions>
                 <configuration>
                     <packageName>com.zuora.api.axis2</packageName>
-                    <wsdlFile>src/main/wsdl/zuora.a.79.0.wsdl</wsdlFile>
+                    <wsdlFile>src/main/wsdl/zuora.production.a.79.0.wsdl</wsdlFile>
                     <databindingName>adb</databindingName>
                     <outputDirectory>target/generated-sources/java</outputDirectory>
                 </configuration>
