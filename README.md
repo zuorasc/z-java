@@ -35,9 +35,21 @@ First, clone the github repository on your computer
     git clone https://github.com/abaenglish/z-java.git
     cd z-java
 
-Copy the sample properties files and edit it to add your credentials
 
-    cp src/main/resources/config.sample.properties src/main/resources/config.properties
+You need create config files with credentials apisandbox in this path:
+
+    src/main/resources/application.yml
+
+Example:
+
+```
+    external:
+      zuora:
+        soap:
+          username: APIUser@abaenglish.com
+          password: 1QA2ws2ws3ed
+          host: apisandbox.zuora.com
+```
 
 Build the JAR file
 
