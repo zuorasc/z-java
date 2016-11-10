@@ -1,6 +1,9 @@
 target
 .DS_Store
-src/main/resources/config.properties
+src/main/resources/application.yml
 .classpath
 .project
 .settings/
+.idea/
+*.iml
+.idea/*
