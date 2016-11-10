@@ -2,46 +2,26 @@ package com.zuora.api.util;
 
 import com.zuora.api.axis2.UnexpectedErrorFault;
 import com.zuora.api.axis2.ZuoraServiceStub;
-import org.apache.axis2.databinding.types.soapencoding.DateTime;
+import com.zuora.api.axis2.ZuoraServiceStub.*;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.zuora.api.axis2.ZuoraServiceStub.Account;
-import com.zuora.api.axis2.ZuoraServiceStub.DeleteResult;
-import com.zuora.api.axis2.ZuoraServiceStub.ID;
-import com.zuora.api.axis2.ZuoraServiceStub.LoginResult;
-import com.zuora.api.axis2.ZuoraServiceStub.QueryResult;
-import com.zuora.api.axis2.ZuoraServiceStub.SaveResult;
-import com.zuora.api.axis2.ZuoraServiceStub.ZObject;
-import com.zuora.api.axis2.ZuoraServiceStub.SubscribeResult;
-import com.zuora.api.axis2.ZuoraServiceStub.SubscribeRequest;
-import com.zuora.api.axis2.ZuoraServiceStub.Contact;
-import com.zuora.api.axis2.ZuoraServiceStub.PaymentMethod;
-import com.zuora.api.axis2.ZuoraServiceStub.Subscription;
-import com.zuora.api.axis2.ZuoraServiceStub.SubscriptionData;
-import com.zuora.api.axis2.ZuoraServiceStub.RatePlanData;
-import com.zuora.api.axis2.ZuoraServiceStub.RatePlan;
-import com.zuora.api.axis2.ZuoraServiceStub.ProductRatePlanCharge;
-import com.zuora.api.axis2.ZuoraServiceStub.RatePlanChargeData;
-import com.zuora.api.axis2.ZuoraServiceStub.RatePlanCharge;
-
 import java.rmi.RemoteException;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 public class ZApiTest {
 
 	private ZApi zapi;
 	private static Logger logger = LoggerFactory.getLogger(ZApiTest.class);
+
+    final static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
 	@Before
 	public void setUp() {
@@ -71,23 +51,57 @@ public class ZApiTest {
 	public void testZSubscribe() throws UnexpectedErrorFault, RemoteException, ParseException {
 		zapi.zLogin();
 
-		SubscriptionData data = new SubscriptionData();
-		data.setSubscription(makeSubscription());
-		data.setRatePlanData(makeRatePlanData());
+		final SubscribeResult[] result =  createSubscription();
 
-		SubscribeRequest request = new SubscribeRequest();
-		request.setAccount(makeAccount());
-		request.setBillToContact(makeContact()); //CONDITIONAL
-		request.setSoldToContact(makeContact()); //NO
-		request.setPaymentMethod(makePaymentMethod()); // NO
-		request.setSubscriptionData(data);
-
-
-		SubscribeResult[] result =  zapi.zSubscribe(new SubscribeRequest[]{  request });
 		Assert.assertNotNull(result);
 		Assert.assertEquals(result[0].getGatewayResponseCode(), "Approved");
 		Assert.assertTrue(result[0].getSuccess());
 	}
+
+	private SubscribeResult[] createSubscription() throws ParseException, UnexpectedErrorFault, RemoteException {
+        SubscriptionData data = new SubscriptionData();
+        data.setSubscription(makeSubscription());
+        data.setRatePlanData(makeRatePlanData());
+
+        SubscribeRequest request = new SubscribeRequest();
+        request.setAccount(makeAccount());
+        request.setBillToContact(makeContact()); //CONDITIONAL
+        request.setSoldToContact(makeContact()); //NO
+        request.setPaymentMethod(makePaymentMethod()); // NO
+        request.setSubscriptionData(data);
+
+        return zapi.zSubscribe(new SubscribeRequest[]{  request });
+    }
+
+	@Test
+	public void testCancelSubscription() throws UnexpectedErrorFault, RemoteException, ParseException {
+        zapi.zLogin();
+
+        // create a subscription first
+        final SubscribeResult[] results =  createSubscription();
+        Assert.assertNotNull(results[0].getSubscriptionId());
+        System.out.println("subscription id: " + results[0].getSubscriptionId() );
+        System.out.println("subscription number: " + results[0].getSubscriptionNumber() );
+        final ID subscriptionId = results[0].getSubscriptionId();
+
+        if(subscriptionId != null) {
+        	// Cancel the subscription
+            final ZuoraServiceStub.Amendment amendment = new ZuoraServiceStub.Amendment();
+            amendment.setType("Cancellation");
+            amendment.setName("Test Cancel Amendment");
+            amendment.setSubscriptionId(subscriptionId);
+            amendment.setContractEffectiveDate(sdf.format(new Date()));
+			amendment.setEffectiveDate(makeSubscription().getContractEffectiveDate());
+
+            final ZuoraServiceStub.AmendResult[] amendResults = zapi.zAmend(new ZuoraServiceStub.Amendment[]{amendment});
+
+            Assert.assertNotNull(amendResults);
+            Assert.assertNotNull(amendResults[0].getAmendmentIds());
+			Assert.assertTrue(amendResults[0].getSuccess());
+		}
+
+	}
+
 
 	@Test
 	public void createWithError() {
@@ -234,7 +248,8 @@ public class ZApiTest {
 		Account acc = new Account();
 		acc.setAccountNumber("T-" + time); // string
 		acc.setBatch("Batch1"); // enum
-		acc.setBillCycleDay(1); // int
+		acc.setBillCycleDay(0); // int
+		acc.setBcdSettingOption("AutoSet");
 		acc.setAllowInvoiceEdit(true); // boolean
 		acc.setAutoPay(false);
 		acc.setCrmId("SFDC-" + time);
@@ -314,8 +329,6 @@ public class ZApiTest {
 	private Subscription makeSubscription() throws ParseException {
 
 		Date date = new Date();
-
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
 		String dateInDatabaseFormat = sdf.format(date);
 

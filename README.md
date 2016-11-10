@@ -70,6 +70,15 @@ This WSDL has changed some attributes in method **Subscription** (PLEASE MANTAIN
 -  **ServiceActivationDate**   date -> string
 -  **TermStartDate**   date -> string
 
+This WSDL has changed some attributes in method **Amendment** (PLEASE MANTAIN THIS CHANGES WHEN UPDATE WSDL):
+-  **ContractEffectiveDate**  date -> string
+-  **CustomerAcceptanceDate**   date -> string
+-  **CustomerAcceptanceDate**   date -> string
+-  **ServiceActivationDate**   date -> string
+-  **SpecificUpdateDate**   date -> string
+-  **TermStartDate**   date -> string
+
+
 ## ZuoraStubService
 
 If you have problems with this generate code you change IntelliJ IDEA.

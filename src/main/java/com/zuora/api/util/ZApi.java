@@ -1,43 +1,23 @@
 package com.zuora.api.util;
 
-import java.io.IOException;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.client.ServiceClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.zuora.api.axis2.InvalidQueryLocatorFault;
 import com.zuora.api.axis2.InvalidTypeFault;
 import com.zuora.api.axis2.InvalidValueFault;
 import com.zuora.api.axis2.LoginFault;
 import com.zuora.api.axis2.MalformedQueryFault;
 import com.zuora.api.axis2.UnexpectedErrorFault;
-import com.zuora.api.axis2.ZuoraServiceStub;
-import com.zuora.api.axis2.ZuoraServiceStub.Create;
-import com.zuora.api.axis2.ZuoraServiceStub.CreateResponse;
-import com.zuora.api.axis2.ZuoraServiceStub.Delete;
-import com.zuora.api.axis2.ZuoraServiceStub.DeleteResponse;
-import com.zuora.api.axis2.ZuoraServiceStub.DeleteResult;
-import com.zuora.api.axis2.ZuoraServiceStub.ID;
-import com.zuora.api.axis2.ZuoraServiceStub.Login;
-import com.zuora.api.axis2.ZuoraServiceStub.LoginResponse;
-import com.zuora.api.axis2.ZuoraServiceStub.LoginResult;
-import com.zuora.api.axis2.ZuoraServiceStub.Query;
-import com.zuora.api.axis2.ZuoraServiceStub.QueryLocator;
-import com.zuora.api.axis2.ZuoraServiceStub.QueryMore;
-import com.zuora.api.axis2.ZuoraServiceStub.QueryMoreResponse;
-import com.zuora.api.axis2.ZuoraServiceStub.QueryResponse;
-import com.zuora.api.axis2.ZuoraServiceStub.QueryResult;
-import com.zuora.api.axis2.ZuoraServiceStub.SaveResult;
-import com.zuora.api.axis2.ZuoraServiceStub.SessionHeader;
-import com.zuora.api.axis2.ZuoraServiceStub.Update;
-import com.zuora.api.axis2.ZuoraServiceStub.UpdateResponse;
-import com.zuora.api.axis2.ZuoraServiceStub.ZObject;
+import com.zuora.api.axis2.*;
+import com.zuora.api.axis2.ZuoraServiceStub.*;
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.ServiceClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class ZApi {
 
@@ -572,6 +552,95 @@ public class ZApi {
             logger.error("An error occurred during the zDelete() call");
 
         return deleteResult;
+    }
+
+    /**
+     * Send amendments to zuora. Amendments change subscriptions.
+     * The following fields are always required for this call:
+     *   Amendment.Type
+     *       Amendment.Name
+     *       Amendment.SubscriptionId
+     * @param amendments
+     *          Array of amendments for send to zuora
+     * @return
+     *          Array of results of each amendment processed
+     * @throws UnexpectedErrorFault
+     * @throws RemoteException
+     */
+    private ZuoraServiceStub.AmendResult[] zAmendUnit(ZuoraServiceStub.Amendment[] amendments) throws UnexpectedErrorFault, RemoteException {
+        final ZuoraServiceStub.AmendRequest amend = new ZuoraServiceStub.AmendRequest();
+        amend.setAmendments(amendments);
+
+        final ZuoraServiceStub.Amend amends = new ZuoraServiceStub.Amend();
+        amends.setRequests(new ZuoraServiceStub.AmendRequest[]{amend});
+
+
+        final ZuoraServiceStub.AmendResponse resp = stub.amend(amends, this.header);
+        return resp.getResults();
+    }
+
+    /**
+     * Print in log errors details if exits
+     *
+     * @param errors
+     *          Array of Zuora errors
+     */
+    void printZuoraErrors(com.zuora.api.axis2.ZuoraServiceStub.Error[] errors) {
+        if(errors.length > 0) {
+            logger.error("Create call failed with the following errors:");
+            for (com.zuora.api.axis2.ZuoraServiceStub.Error error : errors) {
+                logger.error("field: {} | message: {} | code: {}", error.getField(), error.getMessage(), error.getCode());
+            }
+        }
+    }
+
+    /**
+     * {@see ZApi.zAmendUnit}
+     *
+     * If amendments array exceeds the {code MAX_OBJECTS} limit,
+     * then process amends as blocks of {code MAX_OBJECTS} size and make multiple calls to ZuoraServiceStub.amend.
+     *
+     * @param amendments
+     *          Array of amendments for send to zuora
+     * @return
+     *          Array of results of each amendment processed
+     * @throws UnexpectedErrorFault
+     * @throws RemoteException
+     */
+    public ZuoraServiceStub.AmendResult[] zAmend(ZuoraServiceStub.Amendment[] amendments) throws UnexpectedErrorFault, RemoteException {
+
+        ZuoraServiceStub.AmendResult[] amendResult;
+
+        /*
+            Check to process amend as bulk or not
+         */
+        if (amendments.length > MAX_OBJECTS) {
+            final ZObject[][] bulkStructure = ZuoraUtility.splitObjects(amendments);
+            final List<AmendResult> bulkResults = new ArrayList(0);
+            for (int i = 0; i < bulkStructure.length; i++) {
+                bulkResults.addAll(Arrays.asList(zAmendUnit((Amendment[]) bulkStructure[i])));
+            }
+            amendResult = bulkResults.toArray(new AmendResult[0]);
+
+        } else {
+
+            amendResult = zAmendUnit(amendments);
+        }
+
+        // check results
+        if (amendResult != null) {
+            logger.debug("Successfully received {} amend result(s).", amendResult.length);
+            for (ZuoraServiceStub.AmendResult result : amendResult) {
+                if (!result.getSuccess()) {
+                    printZuoraErrors(result.getErrors());
+                }
+            }
+
+        } else {
+            logger.error("Null object received during zAmend() operation");
+        }
+
+        return amendResult;
     }
 
     // --- Setter(s) & Getter(s) ---
