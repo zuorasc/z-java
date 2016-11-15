@@ -46,8 +46,8 @@ Example:
     external:
       zuora:
         soap:
-          username: APIUser@abaenglish.com
-          password: 1QA2ws2ws3ed
+          username: apiuserzuora@abaenglish.com
+          password: thisismypassword
           host: apisandbox.zuora.com
 ```
 
