@@ -1,0 +1,6 @@
+external:
+  zuora:
+    soap:
+      username: APIUser@abaenglish.com
+      password: thisisapassword
+      host: apisandbox.zuora.com

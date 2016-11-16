@@ -4,6 +4,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -11,6 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import com.zuora.api.axis2.ZuoraServiceStub.ID;
 import com.zuora.api.axis2.ZuoraServiceStub.ZObject;
+import org.springframework.core.io.Resource;
+import org.yaml.snakeyaml.Yaml;
 
 public class ZuoraUtility {
 
@@ -18,7 +23,9 @@ public class ZuoraUtility {
 	private static final Logger logger = LoggerFactory.getLogger(ZuoraUtility.class);
 
 	/** Filename for properties file. */
-	private static final String FILE_PROPERTY_NAME = "config.properties";
+	private static final String FILE_PROPERTY_NAME = "application.yml";
+
+	private static final String VERSION = "79.0";
 
 	/** The properties, loaded from the file. */
 	private static Properties properties = null;
@@ -29,40 +36,22 @@ public class ZuoraUtility {
 	 */
 	@SuppressWarnings("resource")
 	public static void loadProperties() {
-		
-		// Retrieve resource from working directory, if unfound fall back to packaged resource
-		InputStream is;
-		
+		Yaml yaml = new Yaml();
+		ClassLoader loader = ZuoraUtility.class.getClassLoader();
 		try {
-			is = new FileInputStream("./" + FILE_PROPERTY_NAME);
-		} catch (FileNotFoundException e1) {
-			logger.debug("Could not read file from working directoy, switching to packaged properties file");
-			is = ZuoraUtility.class.getResourceAsStream("/" + FILE_PROPERTY_NAME);
-		}
+			InputStream in = new FileInputStream(loader.getResource(FILE_PROPERTY_NAME).getFile());
+			Map config = yaml.loadAs( in, LinkedHashMap.class);
+			properties = new Properties();
 
-		properties = new Properties();
+			Map soap = ((Map)((Map)((Map)config.get("external")).get("zuora")).get("soap"));
 
-		try {
-			properties.load(is);
-			logger.info("Properties successfully loaded from `" + FILE_PROPERTY_NAME + "`");
-
+			properties.setProperty("username", (String)soap.get("username"));
+			properties.setProperty("password", (String)soap.get("password"));
+			String endpoint = "https://" + soap.get("host") + "/apps/services/a/" + VERSION;
+			properties.setProperty("endpoint", endpoint);
 		} catch (IOException e) {
-			logger.error("Error loading properties file | " + e.getMessage());
-
-		} catch (NullPointerException e) {
-			logger.error("Error loading properties file (null pointer exception while loading properties) | "
-					+ e.getMessage());
-		} finally {
-			// Close the resource
-			if (is != null) {
-				try {
-					is.close();
-				} catch (IOException e) {
-					logger.error("Could close the ressource | " + e.getMessage());
-				}
-			}
+			logger.error("error obtain file: " + e.getMessage());
 		}
-		
 	}
 
 	
@@ -139,4 +128,14 @@ public class ZuoraUtility {
 		
 		return zuoraIds;
 	}
+
+	/**
+	 * Gets the current date.
+	 *
+	 * @return the current date
+	 */
+	public static Calendar getCurrentDate() {
+		return Calendar.getInstance();
+	}
+
 }

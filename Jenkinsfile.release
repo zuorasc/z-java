@@ -1,0 +1,21 @@
+node {
+    def mvnHome = tool name: 'maven3', type: 'hudson.tasks.Maven$MavenInstallation'
+    env.PATH = "${mvnHome}/bin:${env.PATH}"
+
+    stage 'release-start'
+    deleteDir()
+    checkout scm
+
+    writeFile file: 'src/main/resources/application.yml', text: "external:\r\n  zuora:\r\n    soap:\r\n      username: ${env.ZUORA_USERNAME}\r\n      password: ${env.ZUORA_PASSWORD}\r\n      host: ${env.ZUORA_HOST}\r\n"
+
+    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: '89af81ea-0d70-480f-a0c7-6bc486e78154', passwordVariable: 'ABBOT_PASSWORD', usernameVariable: 'ABBOT_LOGIN']]) {
+        sh "mvn -B clean package jgitflow:release-start -DautoVersionSubmodules=true -Dusername=${env.ABBOT_LOGIN} -Dpassword=${env.ABBOT_PASSWORD}"
+    }
+
+    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: '89af81ea-0d70-480f-a0c7-6bc486e78154', passwordVariable: 'ABBOT_PASSWORD', usernameVariable: 'ABBOT_LOGIN']]) {
+        sh "mvn -B clean package jgitflow:release-finish -DautoVersionSubmodules=true -Dusername=${env.ABBOT_LOGIN} -Dpassword=${env.ABBOT_PASSWORD} -Dmaven.javadoc.skip=true -DskipTests"
+    }
+
+    sh "mvn -B verify -Pcoverage"
+    step([$class: 'JUnitResultArchiver', testResults: '**/target/*-reports/*.xml'])
+}
