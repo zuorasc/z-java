@@ -150,6 +150,104 @@ public class ZApiTest {
 		logger.info("Successfully deleted the test account");
 	}
 
+
+	@Test
+	public void updateAccountStatus() {
+
+		zapi.zLogin();
+
+		logger.info("Starting account creation");
+
+		Account account = makeAccount();
+
+		account.setName("JMJ-" + account.getName());
+
+		SaveResult[] result = zapi.zCreate(new ZObject[] { (ZObject) account });
+		// Make sure we created the account
+		Assert.assertTrue(result[0].getSuccess());
+		String accountId = result[0].getId().getID();
+
+        //We create a needed soldTo to can active the account and reuse with billTo needed too.
+
+		ID newID = new ID();
+		newID.setID(accountId);
+
+		Contact soldTo = makeContact();
+		soldTo.setAccountId(newID);
+
+		SaveResult[] soldToResult = zapi.zCreate(new ZObject[] { (ZObject) soldTo });
+		Assert.assertTrue(soldToResult[0].getSuccess());
+		String soldToId = soldToResult[0].getId().getID();
+
+		ID newSoldToId = new ID();
+		newSoldToId.setID(soldToId);
+
+		account.setSoldToId(newSoldToId);
+		account.setBillToId(newSoldToId);
+
+		logger.info("Successfully account in draft status with ID = " + accountId);
+
+		logger.info("Check if he's in draft status");
+
+		QueryResult queryResult = zapi.zQuery("SELECT status FROM Account WHERE Id = '" + accountId + "'");
+
+		for (ZObject obj : queryResult.getRecords()) {
+			Account acc = (Account) obj;
+			Assert.assertEquals("Draft", acc.getStatus());
+		}
+
+		logger.info("Set active");
+
+		account.setId(newID);
+		account.setStatus("Active");
+
+		// Update in Zuora
+		SaveResult[] updateResults = zapi.zUpdate(new ZObject[] { (ZObject) account });
+
+		for (SaveResult updated : updateResults) {
+			Assert.assertTrue(updated.getSuccess());
+		}
+
+		logger.info("Check if he's in active status");
+
+		queryResult = zapi.zQuery("SELECT status FROM Account WHERE Id = '" + accountId + "'");
+
+		for (ZObject obj : queryResult.getRecords()) {
+			Account acc = (Account) obj;
+			Assert.assertEquals("Active", acc.getStatus());
+		}
+
+		logger.info("Set cancel");
+
+		account.setStatus("Canceled");
+
+		// Update in Zuora
+		updateResults = zapi.zUpdate(new ZObject[] { (ZObject) account });
+
+		for (SaveResult updated : updateResults) {
+			Assert.assertTrue(updated.getSuccess());
+		}
+
+		logger.info("Check if he's in canceled status");
+
+		queryResult = zapi.zQuery("SELECT status FROM Account WHERE Id = '" + accountId + "'");
+
+		for (ZObject obj : queryResult.getRecords()) {
+			Account acc = (Account) obj;
+			Assert.assertEquals("Canceled", acc.getStatus());
+		}
+
+
+		// Delete this account
+		DeleteResult[] deleteResult = zapi.zDelete(new String[] { accountId }, "Account");
+
+		// Make sure we deleted this test account
+		Assert.assertTrue(deleteResult[0].getSuccess());
+
+		logger.info("Successfully deleted the test account");
+
+
+	}
 	@Test
 	public void createThenUpdateAndDeleteAccount() {
 
